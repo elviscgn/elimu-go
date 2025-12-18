@@ -28,6 +28,7 @@ type User struct {
 	GoogleID string `json:"google_id"`
 }
 
+// loads oauth config from environment
 func init() {
 	godotenv.Load()
 
@@ -48,12 +49,31 @@ func init() {
 	}
 }
 
+// GoogleLogin godoc
+// @Summary      Start Google OAuth login
+// @Description  Redirects to Google OAuth authentication page
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      307
+// @Router       /login [get]
 func GoogleLogin(c *gin.Context) {
 	state := "state_123"
 	authURL := oauthConfig.AuthCodeURL(state)
 	c.Redirect(http.StatusTemporaryRedirect, authURL)
 }
 
+// GoogleCallback godoc
+// @Summary      OAuth callback
+// @Description  Handles Google OAuth callback and creates user session
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        code   query     string  true  "Authorization code from Google"
+// @Success      200    {object}  map[string]interface{}
+// @Failure      400    {object}  map[string]interface{}
+// @Failure      500    {object}  map[string]interface{}
+// @Router       /callback [get]
 func GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
@@ -108,6 +128,15 @@ func GoogleCallback(c *gin.Context) {
 	})
 }
 
+// GetCurrentUser godoc
+// @Summary      Get current user
+// @Description  Returns information about currently logged in user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200    {object}  map[string]interface{}
+// @Failure      401    {object}  map[string]interface{}
+// @Router       /me [get]
 func GetCurrentUser(c *gin.Context) {
 	sessionID, err := c.Cookie("session_id")
 	if err != nil {
@@ -124,6 +153,14 @@ func GetCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user})
 }
 
+// Logout godoc
+// @Summary      Logout user
+// @Description  Clears user session and logs them out
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /logout [get]
 func Logout(c *gin.Context) {
 	sessionID, err := c.Cookie("session_id")
 	if err == nil {

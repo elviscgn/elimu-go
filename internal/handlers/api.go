@@ -8,13 +8,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Welcome godoc
+// @Summary      Welcome message
+// @Description  Returns a welcome message with API info
+// @Tags         general
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       / [get]
 func Welcome(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Student Portal API",
+		"message": "Elimu Portal API",
 		"version": "1.0.0",
 	})
 }
 
+// HealthCheck godoc
+// @Summary      Health check
+// @Description  Check if the API is running
+// @Tags         general
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /health [get]
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "Healthy",
@@ -22,6 +38,14 @@ func HealthCheck(c *gin.Context) {
 	})
 }
 
+// RandomEndpoint godoc
+// @Summary      Random fact
+// @Description  Returns a random student-related fact
+// @Tags         general
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /random [get]
 func RandomEndpoint(c *gin.Context) {
 	facts := []string{
 		"Students who study with music retain information better.",

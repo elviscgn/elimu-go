@@ -9,7 +9,7 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 
 
 ## Features
-- Modules
+### Modules
 - [ ] Identity
 - [ ] User management (`student || staff`)
 - [ ] Curriculum & Projects
