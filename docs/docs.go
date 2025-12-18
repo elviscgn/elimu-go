@@ -20,7 +20,7 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
-                "description": "Returns a welcome message with API info",
+                "description": "Returns API welcome message with version info",
                 "consumes": [
                     "application/json"
                 ],
@@ -28,7 +28,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "general"
+                    "General"
                 ],
                 "summary": "Welcome message",
                 "responses": {
@@ -44,7 +44,7 @@ const docTemplate = `{
         },
         "/callback": {
             "get": {
-                "description": "Handles Google OAuth callback and creates user session",
+                "description": "Processes Google OAuth callback, verifies state, exchanges code for token, and creates user session",
                 "consumes": [
                     "application/json"
                 ],
@@ -52,35 +52,71 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
-                "summary": "OAuth callback",
+                "summary": "Handle OAuth callback",
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "\"4/0AX4XfWgYw...\"",
                         "description": "Authorization code from Google",
                         "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"abc123xyz\"",
+                        "description": "State parameter for CSRF protection",
+                        "name": "state",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Login successful",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handlers.LoginResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Missing or invalid authorization code",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid OAuth state parameter",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Google API error or server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/debug": {
+            "get": {
+                "description": "Returns detailed request debug information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "General"
+                ],
+                "summary": "Debug information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -91,7 +127,7 @@ const docTemplate = `{
         },
         "/health": {
             "get": {
-                "description": "Check if the API is running",
+                "description": "Check if API is running properly",
                 "consumes": [
                     "application/json"
                 ],
@@ -99,7 +135,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "general"
+                    "General"
                 ],
                 "summary": "Health check",
                 "responses": {
@@ -115,7 +151,7 @@ const docTemplate = `{
         },
         "/login": {
             "get": {
-                "description": "Redirects to Google OAuth authentication page",
+                "description": "Redirects to Google OAuth with secure state parameter for authentication",
                 "consumes": [
                     "application/json"
                 ],
@@ -123,12 +159,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Start Google OAuth login",
                 "responses": {
                     "307": {
-                        "description": "Temporary Redirect"
+                        "description": "Redirect to Google"
+                    },
+                    "500": {
+                        "description": "Server configuration error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -143,7 +185,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Logout user",
                 "responses": {
@@ -167,22 +209,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Get current user",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "User data",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handlers.User"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Not logged in or session expired",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -190,7 +230,7 @@ const docTemplate = `{
         },
         "/random": {
             "get": {
-                "description": "Returns a random student-related fact",
+                "description": "Returns a random educational fact",
                 "consumes": [
                     "application/json"
                 ],
@@ -198,9 +238,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "general"
+                    "General"
                 ],
-                "summary": "Random fact",
+                "summary": "Random student fact",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -213,18 +253,69 @@ const docTemplate = `{
             }
         }
     },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Enter your Google OAuth token",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+    "definitions": {
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Error message\nexample: Invalid authorization code",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Success message\nexample: Login successful!",
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Authenticated user data",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/handlers.User"
+                        }
+                    ]
+                }
+            }
+        },
+        "handlers.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "User's email address\nexample: elvischege@student.school.edu",
+                    "type": "string"
+                },
+                "google_id": {
+                    "description": "Google's unique identifier\nexample: 12345678901234567890",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "User's unique ID\nexample: 12345",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "User's full name\nexample: Elvis Chege",
+                    "type": "string"
+                },
+                "picture": {
+                    "description": "URL to user's profile picture\nexample: https://lh3.googleusercontent.com/a/...",
+                    "type": "string"
+                }
+            }
         }
     },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
-    }
+    "tags": [
+        {
+            "description": "User authentication and session management via Google OAuth",
+            "name": "Authentication"
+        },
+        {
+            "description": "Core API endpoints, health checks, and debug utilities",
+            "name": "General"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

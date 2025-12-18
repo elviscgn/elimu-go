@@ -3,39 +3,31 @@
 // @description     Core backend api for elimu student lms
 // @contact.name    API Support
 // @contact.email   iwill@create.later
-
 // @host            localhost:8080
 // @BasePath        /api
-
-// @securityDefinitions.apiKey  BearerAuth
-// @in                          header
-// @name                        Authorization
-// @description                 Enter your Google OAuth token
-
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
+// @tag.name        Authentication
+// @tag.description User authentication and session management via Google OAuth
+// @tag.name        General
+// @tag.description Core API endpoints, health checks, and debug utilities
 package main
 
 import (
-	"elimu-go/internal/handlers"
 	"log"
 	"os"
 
-	_ "elimu-go/docs" // Add this line (docs folder will be auto-generated)
+	_ "elimu-go/docs"
+	"elimu-go/internal/handlers"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// main godoc
-// @Summary      Start the API server
-// @Description  Initializes and runs the Student Portal API on port 8080
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Failed to load .env")
 	}
-	log.Println("ENV loaded")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -44,6 +36,7 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	api := r.Group("/api")
 	{
 		api.GET("/", handlers.Welcome)

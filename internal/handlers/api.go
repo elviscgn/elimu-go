@@ -10,12 +10,18 @@ import (
 
 // Welcome godoc
 // @Summary      Welcome message
-// @Description  Returns a welcome message with API info
-// @Tags         general
+// @Description  Returns API welcome message with version info
+// @Tags         General
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  map[string]interface{}
 // @Router       / [get]
+// @Example      Response
+//
+//	{
+//	  "message": "Elimu Portal API",
+//	  "version": "1.0.0"
+//	}
 func Welcome(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Elimu Portal API",
@@ -24,13 +30,19 @@ func Welcome(c *gin.Context) {
 }
 
 // HealthCheck godoc
-// @Summary      Health check
-// @Description  Check if the API is running
-// @Tags         general
+// @Summary health check
+// @Description  Check if API is running properly
+// @Tags         General
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  map[string]interface{}
 // @Router       /health [get]
+// @Example      Response
+//
+//	{
+//	  "status": "Healthy",
+//	  "timestamp": 1702867200
+//	}
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "Healthy",
@@ -39,13 +51,18 @@ func HealthCheck(c *gin.Context) {
 }
 
 // RandomEndpoint godoc
-// @Summary      Random fact
-// @Description  Returns a random student-related fact
-// @Tags         general
+// @Summary      Random student fact
+// @Description  Returns a random educational fact
+// @Tags         General
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  map[string]interface{}
 // @Router       /random [get]
+// @Example      Response
+//
+//	{
+//	  "fact": "Students who study with music retain information better."
+//	}
 func RandomEndpoint(c *gin.Context) {
 	facts := []string{
 		"Students who study with music retain information better.",
@@ -57,6 +74,23 @@ func RandomEndpoint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"fact": randomFact})
 }
 
+// DebugInfo godoc
+// @Summary      Debug information
+// @Description  Returns detailed request debug information
+// @Tags         General
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /debug [get]
+// @Example      Response
+//
+//	{
+//	  "method": "GET",
+//	  "path": "/api/debug",
+//	  "user_agent": "Mozilla/5.0...",
+//	  "ip": "192.168.1.100",
+//	  "timestamp": "2024-12-17T10:30:00Z"
+//	}
 func DebugInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"method":     c.Request.Method,
