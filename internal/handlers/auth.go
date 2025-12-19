@@ -187,6 +187,8 @@ func GoogleCallback(c *gin.Context) {
 	c.SetCookie("session_id", sessionID, 3600, "/", "", false, true)
 	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
+	// this is where we check whether they exist in our db or nah
+
 	fmt.Print("Logged in")
 	log.Printf("User: %s", user.Name)
 	log.Printf("Email: %s", user.Email)
