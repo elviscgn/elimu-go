@@ -125,3 +125,5 @@ coverage/
 
 # Compiled binary (for your specific project)
 elimu-go
+
+test/users.json

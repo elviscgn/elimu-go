@@ -42,7 +42,7 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 ## 1. Identity & Auth Module
 
 ### Authentication
-- [ ] Google OAuth 2.0 Integration
+- [x] Google OAuth 2.0 Integration
 - [ ] Pre-registration Database Validation (check after Google auth)
 - [ ] Session-based Authentication
 - [ ] Logout with Session Cleanup
@@ -50,10 +50,6 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 ### Authorization
 - [ ] Role-based Access Control (different endpoints for students, teachers, admins)
 - [ ] Current User Info Endpoint (`GET /api/v1/auth/me`)
-
-### Security
-- [ ] CSRF Protection
-- [ ] Secure Cookie Configuration
 - [ ] Admin ability to suspend/reactivate accounts
 
 ### User Management
