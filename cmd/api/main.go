@@ -34,6 +34,8 @@ func main() {
 		port = "8080"
 	}
 
+	handlers.InitDB()
+
 	r := gin.Default()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -47,6 +49,7 @@ func main() {
 		api.GET("/callback", handlers.GoogleCallback)
 		api.GET("/me", handlers.GetCurrentUser)
 		api.GET("/logout", handlers.Logout)
+
 		api.GET("/admin/overview", handlers.AdminOverview)
 	}
 
