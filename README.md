@@ -43,9 +43,9 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 
 ### Authentication
 - [x] Google OAuth 2.0 Integration
-- [ ] Pre-registration Database Validation (check after Google auth)
-- [ ] Session-based Authentication
-- [ ] Logout with Session Cleanup
+- [x] Pre-registration Database Validation (check after Google auth)
+- [x] Session-based Authentication
+- [x] Logout with Session Cleanup
 
 ### Authorization
 - [ ] Role-based Access Control (different endpoints for students, teachers, admins)
