@@ -66,6 +66,47 @@ type LoginResponse struct {
 	User *User `json:"user"`
 }
 
+func userExists(email string) (bool, string, error) {
+	ctx := context.Background()
+
+	var role string
+
+	// check students
+	err := DB.QueryRow(ctx,
+		`SELECT 'student' FROM students WHERE email=$1`,
+		email,
+	).Scan(&role)
+
+	if err == nil {
+		return true, role, nil
+	}
+
+	// check staff
+	err = DB.QueryRow(ctx,
+		`SELECT role FROM staff WHERE email=$1`,
+		email,
+	).Scan(&role)
+
+	if err == nil {
+		return true, "staff:" + role, nil
+	}
+
+	return false, "", nil
+}
+
+func getActiveSessions() []User {
+	var users []User
+
+	sessions.Range(func(_, value any) bool {
+		if u, ok := value.(*User); ok {
+			users = append(users, *u)
+		}
+		return true
+	})
+
+	return users
+}
+
 func init() {
 	godotenv.Load()
 
@@ -187,11 +228,25 @@ func GoogleCallback(c *gin.Context) {
 	c.SetCookie("session_id", sessionID, 3600, "/", "", false, true)
 	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
-	// this is where we check whether they exist in our db or nah
+	exists, role, err := userExists(user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error: "Database error",
+		})
+		return
+	}
+
+	if !exists {
+		c.JSON(http.StatusForbidden, ErrorResponse{
+			Error: "User not registered in Elimu",
+		})
+		return
+	}
 
 	fmt.Print("Logged in")
 	log.Printf("User: %s", user.Name)
 	log.Printf("Email: %s", user.Email)
+	log.Printf("Role: %s", role)
 
 	c.JSON(http.StatusOK, LoginResponse{
 		Message: "Login successful!",
