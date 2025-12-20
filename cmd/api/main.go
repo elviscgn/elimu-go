@@ -47,6 +47,7 @@ func main() {
 		api.GET("/callback", handlers.GoogleCallback)
 		api.GET("/me", handlers.GetCurrentUser)
 		api.GET("/logout", handlers.Logout)
+		api.GET("/admin/overview", handlers.AdminOverview)
 	}
 
 	log.Printf("Starting :%s", port)
