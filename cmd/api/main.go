@@ -12,6 +12,7 @@
 package main
 
 import (
+	"elimu-go/internal/middleware"
 	"log"
 	"os"
 
@@ -50,7 +51,15 @@ func main() {
 		api.GET("/me", handlers.GetCurrentUser)
 		api.GET("/logout", handlers.Logout)
 
-		api.GET("/admin/overview", handlers.AdminOverview)
+	}
+
+	admin := api.Group("/admin")
+	admin.Use(
+		middleware.RequireLogin(handlers.Sessions),
+		middleware.RequireRole("admin", "cto"),
+	)
+	{
+		admin.GET("/overview", handlers.AdminOverview)
 	}
 
 	log.Printf("Starting :%s", port)
