@@ -3,9 +3,10 @@ package handlers
 import (
 	"context"
 	"crypto/rand"
+	"elimu-go/internal/models"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+
 	"io"
 	"log"
 	"net/http"
@@ -23,29 +24,10 @@ var (
 	sessions    = &sync.Map{}
 )
 
+var Sessions = sessions // expose
+
 // User represents an authenticated user
 // swagger:model User
-type User struct {
-	// User's unique ID
-	// example: 12345
-	ID string `json:"id"`
-
-	// User's email address
-	// example: elvischege@student.school.edu
-	Email string `json:"email"`
-
-	// User's full name
-	// example: Elvis Chege
-	Name string `json:"name"`
-
-	// URL to user's profile picture
-	// example: https://lh3.googleusercontent.com/a/...
-	Picture string `json:"picture"`
-
-	// Google's unique identifier
-	// example: 12345678901234567890
-	GoogleID string `json:"google_id"`
-}
 
 // ErrorResponse represents an API error
 // swagger:model ErrorResponse
@@ -63,7 +45,7 @@ type LoginResponse struct {
 	Message string `json:"message"`
 
 	// Authenticated user data
-	User *User `json:"user"`
+	User *models.User `json:"user"`
 }
 
 func userExists(email string) (bool, string, error) {
@@ -88,17 +70,17 @@ func userExists(email string) (bool, string, error) {
 	).Scan(&role)
 
 	if err == nil {
-		return true, "staff:" + role, nil
+		return true, role, nil
 	}
 
 	return false, "", nil
 }
 
-func getActiveSessions() []User {
-	var users []User
+func getActiveSessions() []models.User {
+	var users []models.User
 
 	sessions.Range(func(_, value any) bool {
-		if u, ok := value.(*User); ok {
+		if u, ok := value.(*models.User); ok {
 			users = append(users, *u)
 		}
 		return true
@@ -211,15 +193,27 @@ func GoogleCallback(c *gin.Context) {
 		Name    string `json:"name"`
 		Picture string `json:"picture"`
 	}
-
 	json.Unmarshal(body, &userInfo)
 
-	user := &User{
+	// 🔑 FIX: Check DB first to get role before creating user
+	exists, role, err := userExists(userInfo.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Database error"})
+		return
+	}
+	if !exists {
+		c.JSON(http.StatusForbidden, ErrorResponse{Error: "User not registered in Elimu"})
+		return
+	}
+
+	// Create user with role after DB check
+	user := &models.User{
 		ID:       userInfo.ID,
 		Email:    userInfo.Email,
 		Name:     userInfo.Name,
 		Picture:  userInfo.Picture,
 		GoogleID: userInfo.ID,
+		Role:     role, // <-- now included
 	}
 
 	sessionID := "session_" + user.ID
@@ -228,25 +222,7 @@ func GoogleCallback(c *gin.Context) {
 	c.SetCookie("session_id", sessionID, 3600, "/", "", false, true)
 	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
-	exists, role, err := userExists(user.Email)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Database error",
-		})
-		return
-	}
-
-	if !exists {
-		c.JSON(http.StatusForbidden, ErrorResponse{
-			Error: "User not registered in Elimu",
-		})
-		return
-	}
-
-	fmt.Print("Logged in")
-	log.Printf("User: %s", user.Name)
-	log.Printf("Email: %s", user.Email)
-	log.Printf("Role: %s", role)
+	log.Printf("User logged in: %s (%s)", user.Email, role)
 
 	c.JSON(http.StatusOK, LoginResponse{
 		Message: "Login successful!",
@@ -285,9 +261,9 @@ func GetCurrentUser(c *gin.Context) {
 		return
 	}
 
-	user, ok := value.(*User)
+	user, ok := value.(*models.User)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Invalid session"})
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Invalid session user"})
 		return
 	}
 
