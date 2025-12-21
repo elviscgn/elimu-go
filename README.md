@@ -11,7 +11,7 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 
 ## Features
 ### Modules
-- [ ] Identity
+- [x] Identity
 - [ ] User management (`student || staff`)
 - [ ] Curriculum & Projects
 - [ ] Documents
@@ -48,14 +48,14 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 - [x] Logout with Session Cleanup
 
 ### Authorization
-- [ ] Role-based Access Control (different endpoints for students, teachers, admins)
-- [ ] Current User Info Endpoint (`GET /api/v1/auth/me`)
-- [ ] Admin ability to suspend/reactivate accounts
+- [x] Role-based Access Control (different endpoints for students, teachers, admins)
+- [x] Current User Info Endpoint (`GET /api/me`)
+
 
 ### User Management
-- [ ] User Model with Roles and `is_active` flag
-- [ ] Pre-registration Table Sync
-- [ ] Login History Tracking
+- [x] User Model with Roles
+- [x] Pre-registration Table Sync
+
 - [ ] Admin User Management Endpoints
 
 ---
@@ -127,7 +127,8 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 - [ ] Bulk User Management (Import/Export)
 - [ ] Role Assignment
 - [ ] Account Management (Enable/Disable)
-- [ ] Audit Logging
+- [ ] Audit Logging (logins, everything)
+
 
 ### System Management
 - [ ] Health Monitoring Endpoints
@@ -164,36 +165,6 @@ but in golang (mostly porting the logic I will do in the java springboot and com
 - [ ] API Security Configuration
 - [ ] CORS Policy Management
 - [ ] Security Headers Enforcement
-
----
-
-## Development Phases
-
-### Phase 1: Foundation (
-- [ ] Project Setup
-- [ ] Database Schema Design
-- [ ] Google OAuth with Pre-registration Check
-- [ ] Basic User and Course Models
-- [ ] Authentication System
-
-### Phase 2: Core Academic 
-- [ ] Enrollment System
-- [ ] Basic Exam System (Multiple Choice Only)
-- [ ] Grade Management
-- [ ] Profile System
-- [ ] Admin User Management
-
-### Phase 3: Exam System  
-- [ ] Code Execution Sandbox
-- [ ] Advanced Exam Management
-- [ ] Basic Integrity Checks
-- [ ] Real-time Monitoring Features
-
-### Phase 4: Polish & Scale  
-- [ ] Performance Optimization
-- [ ] Comprehensive Testing
-- [ ] Security Hardening
-- [ ] API Documentation
 
 ---
 
